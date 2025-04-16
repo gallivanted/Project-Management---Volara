@@ -28,6 +28,8 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import anime from 'animejs';
 import styled from 'styled-components';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 const StyledPaper = muiStyled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
@@ -246,12 +248,14 @@ const MemberCard = ({ member, onDeadlineEdit }) => {
         <Dialog open={editing} onClose={handleDialogClose}>
           <DialogTitle>Edit Deadline</DialogTitle>
           <DialogContent>
-            <DatePicker
-              label="Due Date"
-              value={tempDeadline}
-              onChange={handleDateChange}
-              renderInput={(params) => <Box component="div" sx={{ mt: 2 }}>{params.input}</Box>}
-            />
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <DatePicker
+                label="Due Date"
+                value={tempDeadline}
+                onChange={handleDateChange}
+                sx={{ mt: 2, width: '100%' }}
+              />
+            </LocalizationProvider>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleDialogClose}>Cancel</Button>
