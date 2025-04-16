@@ -8,6 +8,7 @@ import AllTasks from './pages/AllTasks';
 import Reports from './pages/Reports';
 import Calendar from './pages/Calendar';
 import TeamMembers from './pages/TeamMembers';
+import Settings from './pages/Settings';
 import Layout from './components/Layout';
 
 const theme = createTheme({
@@ -23,6 +24,15 @@ const theme = createTheme({
       default: '#f5f5f5',
       paper: '#ffffff',
     },
+    error: {
+      main: '#B00020', // Deep red for better visibility
+      light: '#FFEBEE',
+    },
+    deadline: {
+      main: '#B00020', // Deep red for deadlines
+      light: '#FFEBEE',
+      contrastText: '#FFFFFF',
+    },
   },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
@@ -32,9 +42,30 @@ const theme = createTheme({
     h2: {
       fontWeight: 600,
     },
+    deadline: {
+      fontWeight: 600,
+      fontSize: '0.875rem',
+    },
   },
   shape: {
     borderRadius: 12,
+  },
+  components: {
+    MuiChip: {
+      variants: [
+        {
+          props: { variant: 'deadline' },
+          style: {
+            backgroundColor: '#B00020',
+            color: '#FFFFFF',
+            fontWeight: 600,
+            '&:hover': {
+              backgroundColor: '#8B001A',
+            },
+          },
+        },
+      ],
+    },
   },
 });
 
@@ -51,6 +82,7 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/team" element={<TeamMembers />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Layout>
       </Router>

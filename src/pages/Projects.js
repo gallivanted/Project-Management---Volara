@@ -27,32 +27,59 @@ const mockProjects = [
   {
     id: 1,
     title: 'Mobile App Redesign',
-    description: 'Redesign the mobile app interface for better user experience',
+    description: 'Redesign the mobile app interface for better user experience. Implement new design system, improve navigation flow, and enhance accessibility features.',
     progress: 75,
     status: 'In Progress',
     members: 5,
     tasks: 12,
-    dueDate: '2024-03-15',
+    dueDate: '2025-04-20',
+    highlights: [
+      'Wireframes completed',
+      'User testing scheduled',
+      'Design system created',
+      'Prototype in review',
+      'Accessibility audit in progress'
+    ],
+    budget: '$12,500',
+    sponsors: 2
   },
   {
     id: 2,
     title: 'Website Development',
-    description: 'Create a new company website with modern technologies',
+    description: 'Create a new company website with modern technologies. Focus on performance optimization, SEO, and responsive design for all devices.',
     progress: 30,
     status: 'Planning',
     members: 4,
     tasks: 8,
-    dueDate: '2024-04-01',
+    dueDate: '2025-04-15',
+    highlights: [
+      'Tech stack selected',
+      'Content strategy defined',
+      'SEO requirements documented',
+      'Design mockups approved',
+      'Development environment set up'
+    ],
+    budget: '$18,000',
+    sponsors: 1
   },
   {
     id: 3,
     title: 'Marketing Campaign',
-    description: 'Launch Q1 marketing campaign across social media',
+    description: 'Launch Q2 marketing campaign across social media platforms. Develop creative assets, coordinate with influencers, and track performance metrics.',
     progress: 90,
     status: 'Review',
     members: 3,
     tasks: 15,
-    dueDate: '2024-02-28',
+    dueDate: '2025-04-10',
+    highlights: [
+      'Campaign strategy finalized',
+      'Creative assets produced',
+      'Influencer contracts signed',
+      'Ad spend allocated',
+      'Analytics dashboard created'
+    ],
+    budget: '$25,000',
+    sponsors: 4
   },
   {
     id: 4,
@@ -62,7 +89,7 @@ const mockProjects = [
     status: 'In Progress',
     members: 6,
     tasks: 20,
-    dueDate: '2024-05-01',
+    dueDate: '2025-04-30',
     highlights: [
       'Venue booked',
       'Press kit ready',
@@ -351,4 +378,5 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+// Wrap with React.memo for performance optimization
+export default React.memo(Projects);

@@ -71,8 +71,9 @@ const mockTasks = {
 };
 
 const Calendar = () => {
-  const [selectedDate, setSelectedDate] = React.useState(null);
+  const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [currentMonth, setCurrentMonth] = React.useState(new Date());
+  const [selectedDateEvents, setSelectedDateEvents] = React.useState([]);
 
   React.useEffect(() => {
     // Animate calendar cells on mount
@@ -88,6 +89,13 @@ const Calendar = () => {
       easing: 'easeOutExpo',
     });
   }, [currentMonth]);
+  
+  React.useEffect(() => {
+    if (selectedDate) {
+      const dateString = selectedDate.toISOString().split('T')[0];
+      setSelectedDateEvents(mockTasks[dateString] || []);
+    }
+  }, [selectedDate]);
 
   const getDaysInMonth = (date) => {
     const year = date.getFullYear();
@@ -230,8 +238,81 @@ const Calendar = () => {
           {renderCalendar()}
         </Grid>
       </Paper>
+      
+      {selectedDate && (
+        <Paper elevation={0} sx={{ p: 3, mb: 3, mt: 4 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Typography variant="h6">
+              Selected Date: {selectedDate.toLocaleDateString()}
+            </Typography>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<AddIcon />}
+              size="small"
+            >
+              Add Event
+            </Button>
+          </Box>
+          
+          {selectedDateEvents.length > 0 ? (
+            <Box>
+              <Typography variant="subtitle1" sx={{ mb: 2 }}>Events ({selectedDateEvents.length})</Typography>
+              <Grid container spacing={2}>
+                {selectedDateEvents.map((event) => (
+                  <Grid item xs={12} sm={6} md={4} key={event.id}>
+                    <Paper 
+                      elevation={0} 
+                      sx={{ 
+                        p: 2, 
+                        border: '1px solid #eee',
+                        borderLeft: `4px solid ${
+                          event.type === 'meeting' ? theme.palette.primary.main :
+                          event.type === 'review' ? theme.palette.info.main :
+                          event.type === 'milestone' ? theme.palette.secondary.main :
+                          theme.palette.grey[500]
+                        }`,
+                        '&:hover': {
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          transform: 'translateY(-2px)',
+                        },
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <Typography variant="subtitle1" fontWeight={600}>{event.title}</Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                          {event.type.charAt(0).toUpperCase() + event.type.slice(1)}
+                        </Typography>
+                        <Box sx={{ ml: 'auto' }}>
+                          <Avatar sx={{ width: 24, height: 24 }}>{event.assignee}</Avatar>
+                        </Box>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+          ) : (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body1" color="text.secondary">
+                No events scheduled for this date
+              </Typography>
+              <Button 
+                variant="outlined" 
+                color="primary" 
+                startIcon={<AddIcon />}
+                sx={{ mt: 2 }}
+              >
+                Add Your First Event
+              </Button>
+            </Box>
+          )}
+        </Paper>
+      )}
     </Box>
   );
 };
 
-export default Calendar; 
+// Wrap with React.memo for performance optimization
+export default React.memo(Calendar); 

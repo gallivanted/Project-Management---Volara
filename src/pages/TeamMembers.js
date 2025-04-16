@@ -96,18 +96,24 @@ const mockTeamMembers = [
 const DeadlineBox = styled(Box)`
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   cursor: pointer;
-  background: ${props => props.status === 'overdue' ? props.theme.palette.error.light : props.status === 'soon' ? props.theme.palette.warning.light : '#e8f5e9'};
+  background: ${props => props.status === 'overdue' ? 'rgba(176, 0, 32, 0.1)' : props.status === 'soon' ? props.theme.palette.warning.light : '#e8f5e9'};
   border-radius: 16px;
-  padding: 2px 10px;
-  transition: background 0.2s;
+  padding: 4px 12px;
+  transition: all 0.2s ease;
   color: ${props => props.theme.palette.success.main};
-  ${props => props.status === 'overdue' ? `color: ${props.theme.palette.error.main};` : ''}
+  ${props => props.status === 'overdue' ? `color: #B00020;` : ''}
   ${props => props.status === 'soon' ? `color: ${props.theme.palette.warning.dark};` : ''}
-  font-weight: 500;
-  min-width: 110px;
-  min-height: 28px;
+  font-weight: 600;
+  min-width: 120px;
+  min-height: 32px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  }
 `;
 
 const getDeadlineStatus = (dateStr) => {
@@ -191,12 +197,9 @@ const MemberCard = ({ member, onDeadlineEdit }) => {
   return (
     <StyledPaper elevation={0}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
--        <IconButton>
--          <MoreVertIcon />
--        </IconButton>
-+        <IconButton>
-+          <MoreVertIcon />
-+        </IconButton>
+        <IconButton size="small" sx={{ color: 'text.secondary' }}>
+          <MoreVertIcon />
+        </IconButton>
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
@@ -227,7 +230,14 @@ const MemberCard = ({ member, onDeadlineEdit }) => {
           ) : (
             <DeadlineBox theme={theme} status={status} onClick={handleDeadlineClick}>
               <CalendarTodayIcon sx={{ fontSize: 18 }} />
-              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 700, 
+                  fontSize: 14,
+                  color: status === 'overdue' ? '#B00020' : 'inherit'
+                }}
+              >
                 {formatDeadline(deadline)}
               </Typography>
             </DeadlineBox>
@@ -342,4 +352,5 @@ const TeamMembers = () => {
   );
 };
 
-export default TeamMembers;
+// Wrap with React.memo for performance optimization
+export default React.memo(TeamMembers);

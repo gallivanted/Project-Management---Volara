@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import { 
   Box, 
   Paper, 
@@ -125,11 +125,11 @@ const formatDeadline = (dateStr) => {
 
 const TaskList = () => {
   const theme = useTheme();
-  const [tasks, setTasks] = useState(mockTasks);
-  const [editingId, setEditingId] = useState(null);
-  const [tempDeadline, setTempDeadline] = useState('');
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [expandedId, setExpandedId] = useState(null);
+  const [tasks, setTasks] = React.useState(mockTasks);
+  const [editingId, setEditingId] = React.useState(null);
+  const [tempDeadline, setTempDeadline] = React.useState('');
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [expandedId, setExpandedId] = React.useState(null);
   const progressRefs = React.useRef({});
 
   React.useEffect(() => {
@@ -154,7 +154,7 @@ const TaskList = () => {
           width: `${task.progress}%`,
           duration: 1200,
           easing: 'easeOutQuart',
-          delay: 300 + parseInt(id) * 100
+          delay: 300 + parseInt(id, 10) * 100
         });
       }
     });
@@ -162,8 +162,8 @@ const TaskList = () => {
 
   const handleDeadlineClick = (id, currentDeadline, e) => {
     e.stopPropagation();
-    setEditingId(id);
-    setTempDeadline(currentDeadline);
+    setEditingId(() => id);
+    setTempDeadline(() => currentDeadline);
     
     // Animate the clicked deadline box
     anime({
@@ -183,7 +183,9 @@ const TaskList = () => {
   };
 
   const handleDialogConfirm = () => {
-    setTasks(prev => prev.map(task => task.id === editingId ? { ...task, dueDate: tempDeadline } : task));
+    setTasks(prev => prev.map(task => 
+      task.id === editingId ? { ...task, dueDate: tempDeadline } : task
+    ));
     setEditingId(null);
     setConfirmOpen(true);
   };
@@ -193,29 +195,20 @@ const TaskList = () => {
   };
   
   const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
+    setExpandedId(prevId => prevId === id ? null : id);
     
     // Animate the expansion/collapse
     setTimeout(() => {
       const detailsEl = document.querySelector(`.task-details-${id}`);
       if (detailsEl) {
-        if (expandedId !== id) {
-          anime({
-            targets: detailsEl,
-            height: [0, detailsEl.scrollHeight],
-            opacity: [0, 1],
-            duration: 300,
-            easing: 'easeOutQuad'
-          });
-        } else {
-          anime({
-            targets: detailsEl,
-            height: [detailsEl.scrollHeight, 0],
-            opacity: [1, 0],
-            duration: 300,
-            easing: 'easeOutQuad'
-          });
-        }
+        const isExpanding = expandedId !== id;
+        anime({
+          targets: detailsEl,
+          height: isExpanding ? [0, detailsEl.scrollHeight] : [detailsEl.scrollHeight, 0],
+          opacity: isExpanding ? [0, 1] : [1, 0],
+          duration: 300,
+          easing: 'easeOutQuad'
+        });
       }
     }, 0);
   };
@@ -423,9 +416,6 @@ const TaskList = () => {
               label="Due Date"
               value={tempDeadline ? new Date(tempDeadline) : null}
               onChange={handleDateChange}
-              renderInput={(params) => (
-                <TextField {...params} fullWidth margin="normal" />
-              )}
               slotProps={{
                 textField: {
                   fullWidth: true,

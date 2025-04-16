@@ -154,18 +154,24 @@ const AllTasks = () => {
   const DeadlineBox = styled(Box)`
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     cursor: pointer;
-    background: ${props => props.status === 'overdue' ? theme.palette.error.light : props.status === 'soon' ? theme.palette.warning.light : '#e8f5e9'};
+    background: ${props => props.status === 'overdue' ? 'rgba(176, 0, 32, 0.1)' : props.status === 'soon' ? theme.palette.warning.light : '#e8f5e9'};
     border-radius: 16px;
-    padding: 2px 10px;
-    transition: background 0.2s;
+    padding: 4px 12px;
+    transition: all 0.2s ease;
     color: ${theme.palette.success.main};
-    ${props => props.status === 'overdue' ? `color: ${theme.palette.error.main};` : ''}
+    ${props => props.status === 'overdue' ? `color: #B00020;` : ''}
     ${props => props.status === 'soon' ? `color: ${theme.palette.warning.dark};` : ''}
-    font-weight: 500;
-    min-width: 110px;
-    min-height: 28px;
+    font-weight: 600;
+    min-width: 120px;
+    min-height: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
   `;
 
   const handleDeadlineClick = (id, currentDeadline) => {
@@ -237,13 +243,26 @@ const AllTasks = () => {
                 <TableCell>{task.title}</TableCell>
                 <TableCell>{task.project}</TableCell>
                 <TableCell>
-                  <Avatar sx={{ width: 24, height: 24, mr: 1 }}>{task.assignee.avatar}</Avatar>
-                  {task.assignee.name}
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <Avatar sx={{ width: 28, height: 28, mr: 1.5 }}>{task.assignee.avatar}</Avatar>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {task.assignee.name}
+                    </Typography>
+                  </Box>
                 </TableCell>
                 <TableCell>
                   <DeadlineBox status={getDeadlineStatus(task.dueDate)} onClick={() => handleDeadlineClick(task.id, task.dueDate)}>
                     <CalendarTodayIcon sx={{ fontSize: 18 }} />
-                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>{formatDeadline(task.dueDate)}</Typography>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        fontWeight: 600, 
+                        fontSize: 14,
+                        color: getDeadlineStatus(task.dueDate) === 'overdue' ? '#B00020' : 'inherit'
+                      }}
+                    >
+                      {formatDeadline(task.dueDate)}
+                    </Typography>
                   </DeadlineBox>
                 </TableCell>
                 <TableCell>

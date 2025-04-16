@@ -38,7 +38,7 @@ const Chart = styled(Box)(({ theme }) => ({
   }
 }));
 
-const Tooltip = styled(Box)(({ theme }) => ({
+const ChartTooltip = styled(Box)(({ theme }) => ({
   position: 'absolute',
   backgroundColor: 'rgba(255, 255, 255, 0.95)',
   padding: theme.spacing(0.75),
@@ -47,9 +47,10 @@ const Tooltip = styled(Box)(({ theme }) => ({
   pointerEvents: 'none',
   display: 'none',
   zIndex: 1000,
-  minWidth: '60px',
+  minWidth: '80px',
   textAlign: 'center',
   border: '1px solid rgba(0,0,0,0.05)',
+  transition: 'all 0.2s ease',
 }));
 
 const StatsBox = styled(Box)(({ theme }) => ({
@@ -79,6 +80,7 @@ const StatsOverview = React.forwardRef((props, ref) => {
   const tooltipRef = React.useRef(null);
   const [hoveredPoint, setHoveredPoint] = useState(null);
   const [chartType, setChartType] = useState('line');
+  const [tooltipVisible, setTooltipVisible] = useState(false);
 
   // Sample data points with better distribution
   const productiveData = [
@@ -259,6 +261,24 @@ const StatsOverview = React.forwardRef((props, ref) => {
             tooltip.style.left = `${e.clientX + 10}px`;
             tooltip.style.top = `${e.clientY - 40}px`;
             setHoveredPoint({ value: point.y, color, label: point.label });
+            setTooltipVisible(true);
+            
+            // Animate the dot appearance with anime.js
+            anime({
+              targets: circle,
+              r: [5, 7],
+              duration: 300,
+              easing: 'easeOutElastic(1, .5)'
+            });
+            
+            // Animate tooltip appearance
+            anime({
+              targets: tooltip,
+              opacity: [0, 1],
+              scale: [0.9, 1],
+              duration: 300,
+              easing: 'easeOutQuad'
+            });
           }
         });
 
@@ -266,9 +286,27 @@ const StatsOverview = React.forwardRef((props, ref) => {
           circle.setAttribute('opacity', '0');
           glow.setAttribute('opacity', '0');
           if (tooltipRef.current) {
-            tooltipRef.current.style.display = 'none';
+            anime({
+              targets: tooltipRef.current,
+              opacity: 0,
+              scale: 0.9,
+              duration: 200,
+              easing: 'easeInQuad',
+              complete: () => {
+                tooltipRef.current.style.display = 'none';
+                setTooltipVisible(false);
+              }
+            });
           }
           setHoveredPoint(null);
+          
+          // Animate the dot back to original size
+          anime({
+            targets: circle,
+            r: 5,
+            duration: 300,
+            easing: 'easeOutQuad'
+          });
         });
 
         svg.appendChild(circle);
@@ -663,7 +701,14 @@ const StatsOverview = React.forwardRef((props, ref) => {
       
       <Box sx={{ position: 'relative', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Chart ref={chartRef} />
-        <Tooltip ref={tooltipRef}>
+        <ChartTooltip 
+          ref={tooltipRef} 
+          sx={{ 
+            opacity: tooltipVisible ? 1 : 0,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            border: '1px solid rgba(0,0,0,0.1)'
+          }}
+        >
           {hoveredPoint && (
             <Box sx={{ p: 0.5 }}>
               <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
@@ -671,14 +716,14 @@ const StatsOverview = React.forwardRef((props, ref) => {
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: hoveredPoint.color,
-                fontWeight: 600,
-                fontSize: '0.85rem'
+                fontWeight: 700,
+                fontSize: '0.9rem'
               }}>
                 {hoveredPoint.value}%
               </Typography>
             </Box>
           )}
-        </Tooltip>
+        </ChartTooltip>
       </Box>
 
       <StatsBox>

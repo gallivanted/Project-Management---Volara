@@ -1,0 +1,8 @@
+Enhanced UI components with improved deadline integration and interactive charts
+
+- Added deadline fields with visual indicators for overdue, upcoming, and normal deadlines
+- Implemented DatePicker dialog for editing deadlines with confirmation
+- Enhanced StatsOverview with multiple chart types (line, bar, pie) and interactive tooltips
+- Improved TodayPlans component with better layout and dynamic height adjustment
+- Added expandable task details with descriptions and action buttons
+- Enhanced visual hierarchy with better spacing, typography, and animations
