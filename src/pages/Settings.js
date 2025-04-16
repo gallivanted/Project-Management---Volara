@@ -1,71 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Switch,
-  FormControlLabel,
-  Divider,
-  Grid,
-  Avatar,
-  IconButton,
-  Tab,
-  Tabs,
-  Alert,
-  Snackbar,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  useTheme,
-  Stack
-} from '@mui/material';
-import {
-  Save as SaveIcon,
-  Edit as EditIcon,
-  Notifications as NotificationsIcon,
-  Palette as PaletteIcon,
-  Person as PersonIcon,
-  Security as SecurityIcon,
-  PhotoCamera as PhotoCameraIcon,
-  DarkMode as DarkModeIcon,
-  LightMode as LightModeIcon
-} from '@mui/icons-material';
-import anime from 'animejs';
-import styled from 'styled-components';
+import React from 'react';
+import { Box, Typography, Paper } from '@mui/material';
 
-// Tab Panel component
-function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
+const Settings = () => {
   return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`settings-tabpanel-${index}`}
-      aria-labelledby={`settings-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
+    <Box>
+      <Typography variant="h4" sx={{ mb: 4 }}>Settings</Typography>
+      <Paper sx={{ p: 3 }}>
+        <Typography variant="body1">
+          Settings page is currently under maintenance.
+        </Typography>
+      </Paper>
+    </Box>
   );
-}
+};
 
-const StyledPaper = styled(Paper)`
-  padding: 24px;
-  margin-bottom: 24px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  }
-`;
+export default Settings;
 
 const Settings = () => {
   const theme = useTheme();
