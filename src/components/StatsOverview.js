@@ -40,17 +40,18 @@ const Chart = styled(Box)(({ theme }) => ({
 
 const ChartTooltip = styled(Box)(({ theme }) => ({
   position: 'absolute',
-  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-  padding: theme.spacing(0.75),
+  backgroundColor: 'rgba(255, 255, 255, 0.98)',
+  padding: theme.spacing(1),
   borderRadius: theme.shape.borderRadius,
-  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+  boxShadow: '0 6px 16px rgba(0,0,0,0.15)',
   pointerEvents: 'none',
   display: 'none',
   zIndex: 1000,
-  minWidth: '80px',
+  minWidth: '100px',
   textAlign: 'center',
-  border: '1px solid rgba(0,0,0,0.05)',
+  border: '1px solid rgba(0,0,0,0.08)',
   transition: 'all 0.2s ease',
+  backdropFilter: 'blur(4px)',
 }));
 
 const StatsBox = styled(Box)(({ theme }) => ({
@@ -254,20 +255,36 @@ const StatsOverview = React.forwardRef((props, ref) => {
 
         circle.addEventListener('mouseenter', (e) => {
           circle.setAttribute('opacity', '1');
-          glow.setAttribute('opacity', '0.3');
+          glow.setAttribute('opacity', '0.5');
           const tooltip = tooltipRef.current;
           if (tooltip) {
             tooltip.style.display = 'block';
-            tooltip.style.left = `${e.clientX + 10}px`;
-            tooltip.style.top = `${e.clientY - 40}px`;
-            setHoveredPoint({ value: point.y, color, label: point.label });
+            
+            // Calculate position based on SVG coordinates
+            const svgRect = svg.getBoundingClientRect();
+            const circleX = parseFloat(circle.getAttribute('cx'));
+            const circleY = parseFloat(circle.getAttribute('cy'));
+            
+            // Convert SVG coordinates to screen coordinates
+            const screenX = svgRect.left + (circleX / 800) * svgRect.width;
+            const screenY = svgRect.top + (circleY / 400) * svgRect.height;
+            
+            tooltip.style.left = `${screenX + 15}px`;
+            tooltip.style.top = `${screenY - 45}px`;
+            
+            setHoveredPoint({ 
+              value: point.y, 
+              color, 
+              label: point.label,
+              dataType: color === '#4CAF50' ? 'Productivity' : 'Completion'
+            });
             setTooltipVisible(true);
             
             // Animate the dot appearance with anime.js
             anime({
               targets: circle,
-              r: [5, 7],
-              duration: 300,
+              r: [5, 8],
+              duration: 400,
               easing: 'easeOutElastic(1, .5)'
             });
             
@@ -276,6 +293,7 @@ const StatsOverview = React.forwardRef((props, ref) => {
               targets: tooltip,
               opacity: [0, 1],
               scale: [0.9, 1],
+              translateY: [10, 0],
               duration: 300,
               easing: 'easeOutQuad'
             });
@@ -710,14 +728,18 @@ const StatsOverview = React.forwardRef((props, ref) => {
           }}
         >
           {hoveredPoint && (
-            <Box sx={{ p: 0.5 }}>
-              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary' }}>
+            <Box sx={{ p: 0.8 }}>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontWeight: 600 }}>
                 {hoveredPoint.label}
+              </Typography>
+              <Typography variant="caption" sx={{ display: 'block', color: 'text.secondary', fontSize: '0.7rem' }}>
+                {hoveredPoint.dataType}
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: hoveredPoint.color,
-                fontWeight: 700,
-                fontSize: '0.9rem'
+                fontWeight: 800,
+                fontSize: '1rem',
+                mt: 0.5
               }}>
                 {hoveredPoint.value}%
               </Typography>

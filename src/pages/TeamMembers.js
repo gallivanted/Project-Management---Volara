@@ -100,14 +100,14 @@ const DeadlineBox = styled(Box)`
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  background: ${props => props.status === 'overdue' ? 'rgba(176, 0, 32, 0.1)' : props.status === 'soon' ? props.theme.palette.warning.light : '#e8f5e9'};
+  background: ${props => props.status === 'overdue' ? 'rgba(176, 0, 32, 0.15)' : props.status === 'soon' ? props.theme.palette.warning.light : '#e8f5e9'};
   border-radius: 16px;
   padding: 4px 12px;
   transition: all 0.2s ease;
   color: ${props => props.theme.palette.success.main};
   ${props => props.status === 'overdue' ? `color: #B00020;` : ''}
   ${props => props.status === 'soon' ? `color: ${props.theme.palette.warning.dark};` : ''}
-  font-weight: 600;
+  font-weight: 700;
   min-width: 120px;
   min-height: 32px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -143,6 +143,7 @@ const MemberCard = ({ member, onDeadlineEdit }) => {
   const [editing, setEditing] = React.useState(false);
   const [tempDeadline, setTempDeadline] = React.useState(deadline);
   const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
   const deadlineRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -198,10 +199,33 @@ const MemberCard = ({ member, onDeadlineEdit }) => {
 
   return (
     <StyledPaper elevation={0}>
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <IconButton size="small" sx={{ color: 'text.secondary' }}>
-          <MoreVertIcon />
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+        <IconButton 
+          size="small" 
+          sx={{ 
+            color: 'text.secondary',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)',
+              color: 'text.primary'
+            }
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnchorEl(e.currentTarget);
+          }}
+        >
+          <MoreVertIcon fontSize="small" />
         </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <MenuItem onClick={() => setAnchorEl(null)}>Edit Member</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>View Details</MenuItem>
+          <MenuItem onClick={() => setAnchorEl(null)}>Remove</MenuItem>
+        </Menu>
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
@@ -235,9 +259,10 @@ const MemberCard = ({ member, onDeadlineEdit }) => {
               <Typography 
                 variant="body2" 
                 sx={{ 
-                  fontWeight: 700, 
-                  fontSize: 14,
-                  color: status === 'overdue' ? '#B00020' : 'inherit'
+                  fontWeight: 800, 
+                  fontSize: 14.5,
+                  color: status === 'overdue' ? '#B00020' : 'inherit',
+                  letterSpacing: status === 'overdue' ? '0.3px' : 'inherit'
                 }}
               >
                 {formatDeadline(deadline)}
