@@ -1,22 +1,14 @@
+// This file is intentionally left empty as the Settings page has been removed
 import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
 
 const Settings = () => {
-  return (
-    <Box>
-      <Typography variant="h4" sx={{ mb: 4 }}>Settings</Typography>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="body1">
-          Settings page is currently under maintenance.
-        </Typography>
-      </Paper>
-    </Box>
-  );
+  return null;
 };
 
 export default Settings;
 
-const Settings = () => {
+// Removed duplicate Settings component
+/* const Settings = () => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -524,4 +516,4 @@ const Settings = () => {
 };
 
 // Wrap with React.memo for performance optimization
-export default React.memo(Settings);
+*/

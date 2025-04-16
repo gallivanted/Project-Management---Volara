@@ -8,7 +8,6 @@ import AllTasks from './pages/AllTasks';
 import Reports from './pages/Reports';
 import Calendar from './pages/Calendar';
 import TeamMembers from './pages/TeamMembers';
-import Settings from './pages/Settings';
 import Layout from './components/Layout';
 
 const theme = createTheme({
@@ -82,7 +81,6 @@ function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/team" element={<TeamMembers />} />
-            <Route path="/settings" element={<Settings />} />
           </Routes>
         </Layout>
       </Router>

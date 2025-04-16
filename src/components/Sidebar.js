@@ -6,7 +6,6 @@ import {
   CalendarToday, 
   Assignment, 
   Assessment, 
-  Settings,
   People,
   MenuOpen,
   Menu
@@ -194,11 +193,6 @@ const Sidebar = ({ mobileOpen, setMobileOpen, sidebarCollapsed, setSidebarCollap
           <MenuText $isCollapsed={isCollapsed}>Team</MenuText>
         </MenuItem>
 
-        <MenuItem to="/settings" active={location.pathname === '/settings'} isCollapsed={isCollapsed}>
-          <Settings />
-          <MenuText $isCollapsed={isCollapsed}>Settings</MenuText>
-        </MenuItem>
-
         <ToggleButton onClick={toggleSidebar} $isCollapsed={isCollapsed}>
           {isCollapsed ? <MenuOpen /> : <Menu />}
         </ToggleButton>
@@ -236,11 +230,6 @@ const Sidebar = ({ mobileOpen, setMobileOpen, sidebarCollapsed, setSidebarCollap
         <MenuItem to="/team" active={location.pathname === '/team'} onClick={() => setMobileOpen(false)}>
           <People />
           <MenuText>Team</MenuText>
-        </MenuItem>
-
-        <MenuItem to="/settings" active={location.pathname === '/settings'} onClick={() => setMobileOpen(false)}>
-          <Settings />
-          <MenuText>Settings</MenuText>
         </MenuItem>
       </MobileSidebar>
     </>
