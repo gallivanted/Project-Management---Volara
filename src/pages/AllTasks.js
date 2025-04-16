@@ -20,12 +20,22 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Tooltip,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  LinearProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import anime from 'animejs';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import styled from 'styled-components';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const mockTasks = [
   {
@@ -105,9 +115,13 @@ const AllTasks = () => {
     priority: 'all',
     project: 'all',
   });
+  const [editingId, setEditingId] = React.useState(null);
+  const [tempDeadline, setTempDeadline] = React.useState('');
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const [tasks, setTasks] = React.useState(mockTasks);
+  const theme = useTheme();
 
   React.useEffect(() => {
-    // Animate table rows on mount
     anime({
       targets: '.task-row',
       translateX: [-20, 0],
@@ -117,6 +131,65 @@ const AllTasks = () => {
       easing: 'easeOutExpo',
     });
   }, []);
+
+  const getDeadlineStatus = (dateStr) => {
+    const today = new Date();
+    const deadlineDate = new Date(dateStr);
+    const diff = Math.ceil((deadlineDate.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return 'overdue';
+    if (diff <= 3) return 'soon';
+    return 'normal';
+  };
+
+  const formatDeadline = (dateStr) => {
+    const today = new Date();
+    const deadlineDate = new Date(dateStr);
+    const diff = Math.ceil((deadlineDate.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return deadlineDate.toLocaleDateString();
+    if (diff === 0) return 'Due today';
+    if (diff <= 7) return `Due in ${diff} day${diff > 1 ? 's' : ''}`;
+    return deadlineDate.toLocaleDateString();
+  };
+
+  const DeadlineBox = styled(Box)`
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    background: ${props => props.status === 'overdue' ? theme.palette.error.light : props.status === 'soon' ? theme.palette.warning.light : '#e8f5e9'};
+    border-radius: 16px;
+    padding: 2px 10px;
+    transition: background 0.2s;
+    color: ${theme.palette.success.main};
+    ${props => props.status === 'overdue' ? `color: ${theme.palette.error.main};` : ''}
+    ${props => props.status === 'soon' ? `color: ${theme.palette.warning.dark};` : ''}
+    font-weight: 500;
+    min-width: 110px;
+    min-height: 28px;
+  `;
+
+  const handleDeadlineClick = (id, currentDeadline) => {
+    setEditingId(id);
+    setTempDeadline(currentDeadline);
+  };
+
+  const handleDateChange = (newValue) => {
+    setTempDeadline(newValue ? new Date(newValue).toISOString().split('T')[0] : tempDeadline);
+  };
+
+  const handleDialogClose = () => {
+    setEditingId(null);
+  };
+
+  const handleDialogConfirm = () => {
+    setTasks(prev => prev.map(task => task.id === editingId ? { ...task, dueDate: tempDeadline } : task));
+    setEditingId(null);
+    setConfirmOpen(true);
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+  };
 
   const handleFilterChange = (event) => {
     setFilters({
@@ -132,165 +205,121 @@ const AllTasks = () => {
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
+  
+  // Add missing handleClose function
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4">All Tasks</Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-        >
-          Add Task
-        </Button>
+        <Button variant="contained" color="primary" startIcon={<AddIcon />}>Add Task</Button>
       </Box>
-
-      <Paper elevation={0} sx={{ p: 3, mb: 3 }}>
-        <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-          <TextField
-            placeholder="Search tasks..."
-            variant="outlined"
-            size="small"
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={filters.status}
-              name="status"
-              label="Status"
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="todo">Todo</MenuItem>
-              <MenuItem value="in progress">In Progress</MenuItem>
-              <MenuItem value="review">Review</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Priority</InputLabel>
-            <Select
-              value={filters.priority}
-              name="priority"
-              label="Priority"
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="high">High</MenuItem>
-              <MenuItem value="medium">Medium</MenuItem>
-              <MenuItem value="low">Low</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth: 120 }}>
-            <InputLabel>Project</InputLabel>
-            <Select
-              value={filters.project}
-              name="project"
-              label="Project"
-              onChange={handleFilterChange}
-            >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="mobile app">Mobile App</MenuItem>
-              <MenuItem value="backend services">Backend Services</MenuItem>
-              <MenuItem value="knowledge base">Knowledge Base</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Task</TableCell>
-                <TableCell>Project</TableCell>
-                <TableCell>Assignee</TableCell>
-                <TableCell>Due Date</TableCell>
-                <TableCell>Priority</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Progress</TableCell>
-                <TableCell align="right">Actions</TableCell>
+      <TableContainer component={Paper} elevation={0}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Title</TableCell>
+              <TableCell>Project</TableCell>
+              <TableCell>Assignee</TableCell>
+              <TableCell>Due Date</TableCell>
+              <TableCell>Priority</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Progress</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {tasks.map((task) => (
+              <TableRow key={task.id} className="task-row">
+                <TableCell>{task.title}</TableCell>
+                <TableCell>{task.project}</TableCell>
+                <TableCell>
+                  <Avatar sx={{ width: 24, height: 24, mr: 1 }}>{task.assignee.avatar}</Avatar>
+                  {task.assignee.name}
+                </TableCell>
+                <TableCell>
+                  <DeadlineBox status={getDeadlineStatus(task.dueDate)} onClick={() => handleDeadlineClick(task.id, task.dueDate)}>
+                    <CalendarTodayIcon sx={{ fontSize: 18 }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>{formatDeadline(task.dueDate)}</Typography>
+                  </DeadlineBox>
+                </TableCell>
+                <TableCell>
+                  <Chip label={task.priority} color={getPriorityColor(task.priority)} size="small" sx={{ fontWeight: 600 }} />
+                </TableCell>
+                <TableCell>
+                  <Chip label={task.status} color={getStatusColor(task.status)} size="small" sx={{ fontWeight: 600 }} />
+                </TableCell>
+                <TableCell>
+                  <LinearProgress variant="determinate" value={task.progress} sx={{ height: 6, borderRadius: 3, bgcolor: '#e8f5e9', '& .MuiLinearProgress-bar': { bgcolor: '#43a047' } }} />
+                </TableCell>
+                <TableCell>
+                  <IconButton size="small" onClick={(event) => handleMenuClick(event)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                  <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+                    <MenuItem onClick={handleClose}>Edit</MenuItem>
+                    <MenuItem onClick={handleClose}>Delete</MenuItem>
+                    <MenuItem onClick={handleClose}>Archive</MenuItem>
+                  </Menu>
+                </TableCell>
               </TableRow>
-            </TableHead>
-            <TableBody>
-              {mockTasks.map((task) => (
-                <TableRow key={task.id} className="task-row" hover>
-                  <TableCell>{task.title}</TableCell>
-                  <TableCell>{task.project}</TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Avatar sx={{ width: 24, height: 24 }}>{task.assignee.avatar}</Avatar>
-                      <Typography variant="body2">{task.assignee.name}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{new Date(task.dueDate).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Chip
-                      label={task.priority}
-                      size="small"
-                      color={getPriorityColor(task.priority)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={task.status}
-                      size="small"
-                      color={getStatusColor(task.status)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box
-                        sx={{
-                          flexGrow: 1,
-                          bgcolor: 'background.default',
-                          borderRadius: 1,
-                          height: 4,
-                          overflow: 'hidden',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: `${task.progress}%`,
-                            height: '100%',
-                            bgcolor: 'primary.main',
-                          }}
-                        />
-                      </Box>
-                      <Typography variant="body2">{task.progress}%</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={handleMenuClick}>
-                      <MoreVertIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Paper>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleMenuClose}>Edit</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Delete</MenuItem>
-        <MenuItem onClick={handleMenuClose}>Mark as Complete</MenuItem>
-      </Menu>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Dialog open={editingId !== null} onClose={handleDialogClose}>
+        <DialogTitle>Edit Deadline</DialogTitle>
+        <DialogContent>
+          <DatePicker label="Due Date" value={tempDeadline} onChange={handleDateChange} renderInput={(params) => <Box component="div" sx={{ mt: 2 }}>{params.input}</Box>} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Cancel</Button>
+          <Button onClick={handleDialogConfirm} variant="contained" color="primary">Update</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={confirmOpen} onClose={handleConfirmClose}>
+        <DialogTitle>Deadline Updated</DialogTitle>
+        <DialogContent>
+          <Typography>Deadline changed to {formatDeadline(tempDeadline)}.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmClose} autoFocus>OK</Button>
+        </DialogActions>
+      </Dialog>
+      
+      <Dialog open={!!editingId} onClose={handleDialogClose}>
+        <DialogTitle>Edit Deadline</DialogTitle>
+        <DialogContent>
+          <DatePicker
+            label="Due Date"
+            value={tempDeadline}
+            onChange={handleDateChange}
+            renderInput={(params) => <Box component="div" sx={{ mt: 2 }}>{params.input}</Box>}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose}>Cancel</Button>
+          <Button onClick={handleDialogConfirm} variant="contained" color="primary">Update</Button>
+        </DialogActions>
+      </Dialog>
+      
+      {/* Wrap adjacent JSX elements in a fragment */}
+      <>
+      <Dialog open={confirmOpen} onClose={handleConfirmClose}>
+        <DialogTitle>Deadline Updated</DialogTitle>
+        <DialogContent>
+          <Typography>Deadline changed to {formatDeadline(tempDeadline)}.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmClose} autoFocus>OK</Button>
+        </DialogActions>
+      </Dialog>
+      </>
     </Box>
   );
 };
 
-export default AllTasks; 
+export default AllTasks;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Calendar, Clock, Plus, Users, ChevronRight, Bell } from 'lucide-react';
+import { Plus, Users, ChevronRight, Bell } from 'lucide-react';
 import { TaskCard } from '../components/TaskCard';
 import { StatsCard } from '../components/StatsCard';
 import { Header } from '../components/Header';

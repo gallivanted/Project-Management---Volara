@@ -12,22 +12,31 @@ import {
   TextField,
   InputAdornment,
   AvatarGroup,
-  styled,
+  styled as muiStyled,
+  Tooltip,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EmailIcon from '@mui/icons-material/Email';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import anime from 'animejs';
+import styled from 'styled-components';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-const StyledPaper = styled(Paper)(({ theme }) => ({
+const StyledPaper = muiStyled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
 }));
 
-const LargeAvatar = styled(Avatar)(({ theme }) => ({
+const LargeAvatar = muiStyled(Avatar)(({ theme }) => ({
   width: theme.spacing(9),
   height: theme.spacing(9),
   marginBottom: theme.spacing(2),
@@ -44,6 +53,7 @@ const mockTeamMembers = [
     tasksInProgress: 8,
     projectsInvolved: ['Mobile App', 'Website Redesign'],
     performance: 85,
+    deadline: '2024-04-20',
   },
   {
     id: 2,
@@ -55,6 +65,7 @@ const mockTeamMembers = [
     tasksInProgress: 5,
     projectsInvolved: ['Mobile App', 'Brand Guidelines'],
     performance: 92,
+    deadline: '2024-04-18',
   },
   {
     id: 3,
@@ -66,6 +77,7 @@ const mockTeamMembers = [
     tasksInProgress: 6,
     projectsInvolved: ['Website Redesign', 'Customer Portal'],
     performance: 78,
+    deadline: '2024-04-25',
   },
   {
     id: 4,
@@ -77,12 +89,55 @@ const mockTeamMembers = [
     tasksInProgress: 4,
     projectsInvolved: ['API Integration', 'Database Migration'],
     performance: 88,
+    deadline: '2024-04-16',
   },
 ];
 
-const MemberCard = ({ member }) => {
+const DeadlineBox = styled(Box)`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  background: ${props => props.status === 'overdue' ? props.theme.palette.error.light : props.status === 'soon' ? props.theme.palette.warning.light : '#e8f5e9'};
+  border-radius: 16px;
+  padding: 2px 10px;
+  transition: background 0.2s;
+  color: ${props => props.theme.palette.success.main};
+  ${props => props.status === 'overdue' ? `color: ${props.theme.palette.error.main};` : ''}
+  ${props => props.status === 'soon' ? `color: ${props.theme.palette.warning.dark};` : ''}
+  font-weight: 500;
+  min-width: 110px;
+  min-height: 28px;
+`;
+
+const getDeadlineStatus = (dateStr) => {
+  const today = new Date();
+  const deadlineDate = new Date(dateStr);
+  const diff = Math.ceil((deadlineDate.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return 'overdue';
+  if (diff <= 3) return 'soon';
+  return 'normal';
+};
+
+const formatDeadline = (dateStr) => {
+  const today = new Date();
+  const deadlineDate = new Date(dateStr);
+  const diff = Math.ceil((deadlineDate.getTime() - today.setHours(0,0,0,0)) / (1000 * 60 * 60 * 24));
+  if (diff < 0) return deadlineDate.toLocaleDateString();
+  if (diff === 0) return 'Due today';
+  if (diff <= 7) return `Due in ${diff} day${diff > 1 ? 's' : ''}`;
+  return deadlineDate.toLocaleDateString();
+};
+
+const MemberCard = ({ member, onDeadlineEdit }) => {
+  const theme = useTheme();
+  const [deadline, setDeadline] = React.useState(member.deadline);
+  const [editing, setEditing] = React.useState(false);
+  const [tempDeadline, setTempDeadline] = React.useState(deadline);
+  const [confirmOpen, setConfirmOpen] = React.useState(false);
+  const deadlineRef = React.useRef(null);
+
   React.useEffect(() => {
-    // Animate progress bars
     anime({
       targets: `.progress-${member.id}`,
       width: `${member.performance}%`,
@@ -91,12 +146,57 @@ const MemberCard = ({ member }) => {
     });
   }, [member.id, member.performance]);
 
+  React.useEffect(() => {
+    anime({
+      targets: deadlineRef.current,
+      opacity: [0, 1],
+      translateY: [10, 0],
+      duration: 600,
+      easing: 'easeOutQuad',
+    });
+  }, [deadline]);
+
+  React.useEffect(() => {
+    setDeadline(member.deadline);
+  }, [member.deadline]);
+
+  const status = getDeadlineStatus(deadline);
+  const isMobile = window.innerWidth < 400;
+
+  const handleDeadlineClick = (e) => {
+    e.stopPropagation();
+    setTempDeadline(deadline);
+    setEditing(true);
+  };
+
+  const handleDateChange = (newValue) => {
+    setTempDeadline(newValue ? new Date(newValue).toISOString().split('T')[0] : tempDeadline);
+  };
+
+  const handleDialogClose = () => {
+    setEditing(false);
+  };
+
+  const handleDialogConfirm = () => {
+    setDeadline(tempDeadline);
+    setEditing(false);
+    setConfirmOpen(true);
+    if (onDeadlineEdit) onDeadlineEdit(member.id, tempDeadline);
+  };
+
+  const handleConfirmClose = () => {
+    setConfirmOpen(false);
+  };
+
   return (
     <StyledPaper elevation={0}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <IconButton>
-          <MoreVertIcon />
-        </IconButton>
+-        <IconButton>
+-          <MoreVertIcon />
+-        </IconButton>
++        <IconButton>
++          <MoreVertIcon />
++        </IconButton>
       </Box>
 
       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
@@ -113,6 +213,50 @@ const MemberCard = ({ member }) => {
         >
           Contact
         </Button>
+      </Box>
+
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="subtitle2" gutterBottom>Deadline</Typography>
+        <Box ml="auto" ref={deadlineRef}>
+          {isMobile ? (
+            <Tooltip title={formatDeadline(deadline)} placement="top">
+              <DeadlineBox theme={theme} status={status} onClick={handleDeadlineClick}>
+                <CalendarTodayIcon sx={{ fontSize: 18 }} />
+              </DeadlineBox>
+            </Tooltip>
+          ) : (
+            <DeadlineBox theme={theme} status={status} onClick={handleDeadlineClick}>
+              <CalendarTodayIcon sx={{ fontSize: 18 }} />
+              <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 14 }}>
+                {formatDeadline(deadline)}
+              </Typography>
+            </DeadlineBox>
+          )}
+        </Box>
+        <Dialog open={editing} onClose={handleDialogClose}>
+          <DialogTitle>Edit Deadline</DialogTitle>
+          <DialogContent>
+            <DatePicker
+              label="Due Date"
+              value={tempDeadline}
+              onChange={handleDateChange}
+              renderInput={(params) => <Box component="div" sx={{ mt: 2 }}>{params.input}</Box>}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Cancel</Button>
+            <Button onClick={handleDialogConfirm} variant="contained" color="primary">Update</Button>
+          </DialogActions>
+        </Dialog>
+        <Dialog open={confirmOpen} onClose={handleConfirmClose}>
+          <DialogTitle>Deadline Updated</DialogTitle>
+          <DialogContent>
+            <Typography>Deadline changed to {formatDeadline(deadline)}.</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleConfirmClose} autoFocus>OK</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
 
       <Box sx={{ mb: 3 }}>
@@ -167,8 +311,8 @@ const MemberCard = ({ member }) => {
 };
 
 const TeamMembers = () => {
+  const [members, setMembers] = React.useState(mockTeamMembers);
   React.useEffect(() => {
-    // Animate member cards on mount
     anime({
       targets: '.member-card',
       translateY: [20, 0],
@@ -179,49 +323,23 @@ const TeamMembers = () => {
     });
   }, []);
 
+  const handleDeadlineEdit = (id, newDeadline) => {
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, deadline: newDeadline } : m));
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>Team Members</Typography>
-          <Typography variant="body1" color="text.secondary">
-            {mockTeamMembers.length} members in the team
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-        >
-          Add Member
-        </Button>
+        <Typography variant="h4">Team Members</Typography>
+        <Button variant="contained" color="primary" startIcon={<AddIcon />}>Add Member</Button>
       </Box>
-
-      <Box sx={{ mb: 4 }}>
-        <TextField
-          placeholder="Search members..."
-          variant="outlined"
-          size="small"
-          fullWidth
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </Box>
-
       <Grid container spacing={3}>
-        {mockTeamMembers.map((member) => (
-          <Grid item xs={12} sm={6} md={4} lg={3} key={member.id} className="member-card">
-            <MemberCard member={member} />
-          </Grid>
+        {members.map((member) => (
+          <MemberCard key={member.id} member={member} onDeadlineEdit={handleDeadlineEdit} />
         ))}
       </Grid>
     </Box>
   );
 };
 
-export default TeamMembers; 
+export default TeamMembers;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Clock, Filter, Plus, Search } from 'lucide-react';
+import { Filter, Plus, Search } from 'lucide-react';
 import { TaskCard } from '../components/TaskCard';
 import anime from 'animejs';
 
